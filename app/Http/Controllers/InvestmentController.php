@@ -21,6 +21,7 @@ class InvestmentController extends Controller
         $investment->where("customer_id", auth()->user()->id);
         request()->input("status") ? $investment->where("status", request()->input("status")) : $investment;
         $investment = $investment->latest()->paginate(request()->input("page_number"));
+
         return response()->json([
             "message" => "Fetched support",
             "status" => "success",

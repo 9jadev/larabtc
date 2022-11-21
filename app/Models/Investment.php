@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Events\InvestmentEvent;
 use App\Models\Plan;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Events\InvestmentEvent;
 
 class Investment extends Model
 {
@@ -26,11 +26,9 @@ class Investment extends Model
         $startedat_seconds = Carbon::parse($this->started_at)->addDays($this->plan->duration)->getTimestamp();
         $now = time();
         $amount = (($now) / $startedat_seconds) * ($this->profit);
-        event(new InvestmentEvent($this->id));
+        // event(new InvestmentEvent($this->id));
 
-        if ($amount > $this->profit && $this->is_completed) {
-            $this->update(["is_completed" => '1']);
-            $this->refresh();
+        if ($amount > $this->profit && $this->is_completed == '0') {
             event(new InvestmentEvent($this->id));
         }
         return $amount > $this->profit ? $this->profit : $amount;

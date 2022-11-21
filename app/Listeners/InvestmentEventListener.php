@@ -3,7 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\InvestmentEvent;
+use App\Models\Customer;
 use App\Models\Investment;
+use App\Notifications\InvestmentCompletedNotification;
 
 class InvestmentEventListener
 {
@@ -25,10 +27,17 @@ class InvestmentEventListener
      */
     public function handle(InvestmentEvent $event)
     {
-        $investment = Investment::where("id", $event->investment->id)->first();
-        $investment->update([
+        $invest = Investment::where("id", $event->investment)->first();
+        $customer = Customer::where("id", $invest->customer_id)->first();
+        $invest->update([
             "is_completed" => "1",
         ]);
-        logs()->info("sojscml " . $event->investment->id);
+        $invest->save();
+        $invest->refresh();
+        $amount = $invest->profit + ($invest->bouns == null ? 0 : $invest->bouns);
+        logs()->info(" Amount $amount");
+        $customer->deposit($amount);
+        $customer->notify(new InvestmentCompletedNotification($invest, $amount));
+        logs()->info("sojscml " . $event->investment . " ");
     }
 }
