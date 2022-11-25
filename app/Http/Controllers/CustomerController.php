@@ -45,6 +45,18 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+    public function refferaList() {
+        $referral_code = auth()->user()->referral_code;
+        $customers = Customer::where("sponsor_code", $referral_code)->latest()->paginate(request()->input("page_number"));
+
+        return response()->json([
+            "message" => "Fetched successfully.",
+            "status" => "success",
+            "customer" => $customers
+        ], 200);
+
+    }
+
     public function resetPass()
     {
         if (empty(request()->input("email"))) {

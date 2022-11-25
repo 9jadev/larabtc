@@ -34,7 +34,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('customer')->group(function () {
         Route::post('/create', [CustomerController::class, 'create']);
         Route::post('/login', [CustomerController::class, 'login']);
+
         Route::get('/profile', [CustomerController::class, 'show'])->middleware(['auth:sanctum', 'type.customer']);
+
+        Route::post('/list/dowliners', [CustomerController::class, 'refferaList'])->middleware(['auth:sanctum', 'type.customer']);
 
         Route::get('/logout', [CustomerController::class, 'logout'])->middleware(['auth:sanctum', 'type.customer']);
 

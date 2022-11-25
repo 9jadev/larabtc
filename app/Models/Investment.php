@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Investment extends Model
 {
-    use HasFactory;
+    use HasFactory;  
     protected $table = "investments";
     protected $guarded = [];
     protected $with = ["plan"];
@@ -31,7 +31,7 @@ class Investment extends Model
         if ($amount > $this->profit && $this->is_completed == '0') {
             event(new InvestmentEvent($this->id));
         }
-        return $amount > $this->profit ? $this->profit : $amount;
+        return $amount > $this->profit ? $this->profit : ($this->profit - $amount);
     }
     public function getTimeingAttribute()
     {
