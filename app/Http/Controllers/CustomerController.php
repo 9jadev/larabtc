@@ -45,14 +45,15 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function refferaList() {
+    public function refferaList()
+    {
         $referral_code = auth()->user()->referral_code;
         $customers = Customer::where("sponsor_code", $referral_code)->latest()->paginate(request()->input("page_number"));
 
         return response()->json([
             "message" => "Fetched successfully.",
             "status" => "success",
-            "customer" => $customers
+            "customer" => $customers,
         ], 200);
 
     }
@@ -82,6 +83,34 @@ class CustomerController extends Controller
             "message" => "New password send to your email.",
             "status" => "success",
         ], 200);
+    }
+
+    public function transfer(Request $request)
+    {
+        $request->validate([
+            "email" => "required|email|exists:customers,email",
+            "amount" => "required|string",
+        ]);
+        $reciver = Customer::where("email", $request->email)->first();
+        if (auth()->user()->getKey() === $reciver->getKey()) {
+            return response()->json([
+                "message" => "You can't transfer to yourself account.",
+                "status" => "error",
+            ], 400);
+        }
+        if (auth()->user()->customerbalance < $request->amount) {
+            return response()->json([
+                "message" => "Account balance is low.",
+                "status" => "error",
+            ], 400);
+        }
+
+        auth()->user()->transfer($reciver, $request->amount);
+        return response()->json([
+            "message" => "Transfer completed.",
+            "status" => "success",
+        ], 200);
+
     }
 
     public function store($data)
@@ -129,6 +158,42 @@ class CustomerController extends Controller
             "status" => "success",
             "customer" => auth()->user(),
         ], 200);
+    }
+
+    public function resetPasswordCustomer(Request $request)
+    {
+        //  bcrypt($otp),
+        $oldpassword = request()->input("oldpassword");
+        $newpassword = request()->input("newpassword");
+        if (!$oldpassword) {
+            return response()->json([
+                "message" => "Old password is reqired.",
+                "status" => "error",
+            ]);
+        }
+        if (!$newpassword) {
+            return response()->json([
+                "message" => "New password is reqired.",
+                "status" => "error",
+            ]);
+        }
+        $customer = auth()->user();
+        if (!$customer || !Hash::check($oldpassword, $customer->password)) {
+
+            return response()->json([
+                "message" => "The provided credentials are incorrect.",
+                "status" => "error",
+            ], 400);
+        }
+        $customer->update([
+            "password" => bcrypt($newpassword),
+        ]);
+
+        return response()->json([
+            "message" => "Password updated successfully.",
+            "status" => "error",
+        ], 400);
+
     }
 
     public function login(Request $request)
@@ -362,6 +427,12 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        $customer->delete();
+        return response()->json([
+            "message" => "Deleted successfully.",
+            "status" => "success",
+            "data" => $customer,
+        ], 200);
     }
+
 }

@@ -20,6 +20,7 @@ class PlansController extends Controller
             "status" => "success",
             "plans" => $plan,
         ], 200);
+
     }
 
     /**
@@ -40,7 +41,28 @@ class PlansController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            "plan_name" => "required|string",
+            "min_amount" => "required|string",
+            "max_amount" => "required|string",
+            "percentage" => "required|string",
+            "gift_bouns" => "nullable",
+            "duration" => "required|string",
+        ]);
+        $plan = Plan::create([
+            "plan_name" => $request->plan_name,
+            "min_amount" => $request->min_amount,
+            "max_amount" => $request->max_amount,
+            "percentage" => $request->percentage,
+            "gift_bouns" => $request->gift_bouns,
+            "duration" => $request->duration,
+        ]);
+        return response()->json([
+            "message" => "created successfully.",
+            "status" => "success",
+            "plan" => $plan,
+        ], 200);
+
     }
 
     /**
@@ -74,7 +96,28 @@ class PlansController extends Controller
      */
     public function update(Request $request, Plan $plan)
     {
-        //
+        $request->validate([
+            "plan_name" => "required|string",
+            "min_amount" => "required|string",
+            "max_amount" => "required|string",
+            "percentage" => "required|string",
+            "gift_bouns" => "nullable",
+            "duration" => "required|string",
+        ]);
+        $plan->update([
+            "plan_name" => $request->plan_name,
+            "min_amount" => $request->min_amount,
+            "max_amount" => $request->max_amount,
+            "percentage" => $request->percentage,
+            "gift_bouns" => $request->gift_bouns,
+            "duration" => $request->duration,
+        ]);
+
+        return response()->json([
+            "message" => "updated successfully.",
+            "status" => "success",
+            "plan" => $plan,
+        ], 200);
     }
 
     /**
@@ -85,6 +128,11 @@ class PlansController extends Controller
      */
     public function destroy(Plan $plan)
     {
-        //
+        $plan->delete();
+        return response()->json([
+            "message" => "deleted successfully.",
+            "status" => "success",
+            "data" => $plan,
+        ], 200);
     }
 }

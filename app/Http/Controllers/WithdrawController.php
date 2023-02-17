@@ -26,6 +26,19 @@ class WithdrawController extends Controller
         ], 200);
     }
 
+    public function indexList()
+    {
+        $withdrawals = Withdraw::latest();
+        request("status") == null ? $withdrawals : $withdrawals->where("status", request("status"));
+        $withdrawals = $withdrawals->latest()->paginate(request()->input("page_number"));
+        return response()->json([
+            "message" => "Fetched successfully",
+            "status" => "success",
+            "withdrawals" => $withdrawals,
+            "Stax" => request("status"),
+        ], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -63,14 +76,14 @@ class WithdrawController extends Controller
 
         if (auth()->user()->let_withdraw == '1') {
             auth()->user()->withdraw($amount);
+            $customer = auth()->user();
+            $customer->notify(new WithdrawalNotification($withdraw));
             return response()->json([
                 "message" => "Withdrawal successful.",
                 "status" => "success",
                 "withdraw" => $withdraw,
             ], 200);
         }
-        $customer = auth()->user();
-        $customer->notify(new WithdrawalNotification($withdraw));
 
         return response()->json([
             "message" => "Withdrawal successful contact support for confirmation.",
@@ -97,9 +110,41 @@ class WithdrawController extends Controller
      * @param  \App\Models\Withdraw  $withdraw
      * @return \Illuminate\Http\Response
      */
-    public function show(Withdraw $withdraw)
+    public function toggleWithdraw(Withdraw $withdraw)
     {
-        //
+        if (!$withdraw) {
+            return response()->json([
+                "message" => "withdraw does'nt exist.",
+                "status" => "error",
+            ], 400);
+        }
+
+        if ($withdraw->status != 0) {
+            return response()->json([
+                "message" => "Withdraw already completed.",
+                "status" => "error",
+            ], 400);
+        }
+
+        if ($withdraw->customer->customerbalance <= $withdraw->amount) {
+            return response()->json([
+                "message" => "Account balance is low, fund account to continue.",
+                "status" => "error",
+            ], 400);
+        }
+
+        $withdraw->update(["status" => 1]);
+
+        $withdraw->customer->withdraw($withdraw->amount);
+
+        $withdraw->customer->notify(new WithdrawalNotification($withdraw));
+
+        return response()->json([
+            "message" => "Withdrawal successful.",
+            "status" => "success",
+            "withdraw" => $withdraw,
+        ], 200);
+
     }
 
     /**

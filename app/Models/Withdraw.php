@@ -11,7 +11,12 @@ class Withdraw extends Model
     use HasFactory;
     protected $table = "withdraw";
     protected $guarded = [];
-    protected $with = ["paymenttype"];
+    protected $with = ["paymenttype", "customer"];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, "customer_id");
+    }
 
     public function paymenttype()
     {

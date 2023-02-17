@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Deposits\CreateDepositRequest;
 use App\Models\Deposit;
+use App\Notifications\DepositNotification;
 use Illuminate\Http\Request;
 
 class DepositController extends Controller
@@ -17,6 +18,19 @@ class DepositController extends Controller
     {
         $deposit = Deposit::whereNotNull('deposit.id');
         $deposit = $deposit->where("customer_id", auth()->user()->id)->latest()->paginate(request()->input("page_number"));
+
+        return response()->json([
+            "message" => "Fetched successfully",
+            "status" => "success",
+            "deposit" => $deposit,
+        ]);
+
+    }
+
+    public function indexDeposit()
+    {
+        $deposit = Deposit::whereNotNull('deposit.id');
+        $deposit = $deposit->latest()->paginate(request()->input("page_number"));
 
         return response()->json([
             "message" => "Fetched successfully",
@@ -64,7 +78,39 @@ class DepositController extends Controller
      */
     public function show(Deposit $deposit)
     {
-        //
+        return response()->json([
+            "message" => "Proceed to make transer.",
+            "status" => "success",
+            "deposit" => $deposit,
+        ], 200);
+    }
+
+    public function toggleStatus(Deposit $deposit)
+    {
+        if (!$deposit) {
+            return response()->json([
+                "message" => "Deposit does'nt exist.",
+                "status" => "error",
+            ], 400);
+        }
+
+        if ($deposit->status != 0) {
+            return response()->json([
+                "message" => "Deposit already completed.",
+                "status" => "error",
+            ], 400);
+        }
+
+        $deposit->update(["status" => 1]);
+        $deposit->customer->deposit($deposit->amount, ["description" => "amount"]);
+
+        $deposit->customer->notify(new DepositNotification($deposit));
+
+        return response()->json([
+            "message" => "Deposit successful.",
+            "status" => "success",
+            "deposit" => $deposit,
+        ], 200);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PaymentType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PaymentTypeController extends Controller
 {
@@ -19,7 +20,7 @@ class PaymentTypeController extends Controller
         $data = request()->input('page_number') ? $paymentType->paginate(request()->input('page_number')) : $paymentType->get();
         return response()->json([
             "message" => "Fetched successfully.",
-            "status" => "error",
+            "status" => "success",
             "data" => $data,
         ], 200);
     }
@@ -31,7 +32,7 @@ class PaymentTypeController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -42,7 +43,24 @@ class PaymentTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            "payment_type_name" => "required|string",
+            "value" => "required|string",
+        ]);
+
+        $data = [
+            "payment_type_code" => Str::of($request->payment_type_name)->lower(),
+            "payment_type_name" => Str::of($request->payment_type_name)->upper(),
+            "payment_type_image" => null,
+            "isdefault" => 0,
+            "value" => $request->value,
+        ];
+        $paymentType = PaymentType::create($data);
+        return response()->json([
+            "message" => "Created successfully.",
+            "status" => "success",
+            "data" => $paymentType,
+        ], 200);
     }
 
     /**
@@ -76,7 +94,24 @@ class PaymentTypeController extends Controller
      */
     public function update(Request $request, PaymentType $paymentType)
     {
-        //
+        $request->validate([
+            "payment_type_name" => "required|string",
+            "value" => "required|string",
+        ]);
+
+        $data = [
+            "payment_type_code" => Str::of($request->payment_type_name)->lower(),
+            "payment_type_name" => Str::of($request->payment_type_name)->upper(),
+            "payment_type_image" => null,
+            "isdefault" => 0,
+            "value" => $request->value,
+        ];
+        $paymentType->update($data);
+        return response()->json([
+            "message" => "updated successfully.",
+            "status" => "success",
+            "data" => $paymentType,
+        ], 200);
     }
 
     /**
@@ -87,6 +122,11 @@ class PaymentTypeController extends Controller
      */
     public function destroy(PaymentType $paymentType)
     {
-        //
+        $paymentType->delete();
+        return response()->json([
+            "message" => "deleted successfully.",
+            "status" => "success",
+            "data" => $paymentType,
+        ], 200);
     }
 }

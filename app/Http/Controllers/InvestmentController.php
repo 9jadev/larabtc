@@ -29,6 +29,19 @@ class InvestmentController extends Controller
         ], 200);
     }
 
+    public function indexList()
+    {
+        $investment = Investment::whereNotNull("investments.id");
+        request()->input("status") ? $investment->where("status", request()->input("status")) : $investment;
+        $investment = $investment->latest()->paginate(request()->input("page_number"));
+
+        return response()->json([
+            "message" => "Fetched support",
+            "status" => "success",
+            "investments" => $investment,
+        ], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

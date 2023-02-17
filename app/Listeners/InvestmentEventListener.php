@@ -34,7 +34,7 @@ class InvestmentEventListener
         ]);
         $invest->save();
         $invest->refresh();
-        $amount = $invest->profit + ($invest->bouns == null ? 0 : $invest->bouns);
+        $amount = $invest->profit + $invest->cost + ($invest->bouns == null ? 0 : $invest->bouns);
         logs()->info(" Amount $amount");
         $customer->deposit($amount);
         $customer->notify(new InvestmentCompletedNotification($invest, $amount));

@@ -10,20 +10,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Investment extends Model
 {
-    use HasFactory;  
+    use HasFactory;
     protected $table = "investments";
     protected $guarded = [];
-    protected $with = ["plan"];
+    protected $with = ["plan", "customer"];
     protected $appends = ["realtime", "timeing"];
 
     public function plan()
     {
         return $this->hasOne(Plan::class, "id", "plan_id");
     }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, "customer_id");
+    }
+
     public function getRealtimeAttribute()
     {
 
-        $startedat_seconds = Carbon::parse($this->started_at)->addDays($this->plan->duration)->getTimestamp();
+        $startedat_seconds = Carbon::parse($this->started_at)->addDays($this->plan?->duration)->getTimestamp();
         $now = time();
         $amount = (($now) / $startedat_seconds) * ($this->profit);
         // event(new InvestmentEvent($this->id));
@@ -35,7 +41,7 @@ class Investment extends Model
     }
     public function getTimeingAttribute()
     {
-        $startedat_seconds = Carbon::parse($this->started_at)->addDays($this->plan->duration)->getTimestamp();
+        $startedat_seconds = Carbon::parse($this->started_at)->addDays($this->plan?->duration)->getTimestamp();
         if ($startedat_seconds - time() < 0) {
             return "Completed";
         }

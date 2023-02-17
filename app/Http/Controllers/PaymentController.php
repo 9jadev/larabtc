@@ -29,6 +29,21 @@ class PaymentController extends Controller
         ], 200);
     }
 
+    public function indexList()
+    {
+        $id = request()->input("id");
+        $payments = Payment::where("customer_id", $id)->get();
+        foreach ($payments as $value) {
+            $payment_types = PaymentType::where("id", $value->payment_types_id)->first();
+            $value["payment_types"] = $payment_types;
+        }
+        return response()->json([
+            "message" => "Fetched successfully",
+            "status" => "success",
+            "payment_type" => $payment_types,
+        ], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      *
