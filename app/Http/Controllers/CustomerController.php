@@ -125,7 +125,7 @@ class CustomerController extends Controller
         $customer->notify(new WelcomeNotification($data));
         $this->payInterest($data["sponsor_code"]);
         if ($data["sponsor_code"] != null || $data["sponsor_code"] != "") {
-            $this->payInterest($data["sponsor_code"]);
+            // $this->payInterest($data["sponsor_code"]);
         }
 
         return response()->json([

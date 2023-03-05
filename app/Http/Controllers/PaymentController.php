@@ -40,7 +40,7 @@ class PaymentController extends Controller
         return response()->json([
             "message" => "Fetched successfully",
             "status" => "success",
-            "payment_type" => $payment_types,
+            "payment_type" => $payments,
         ], 200);
     }
 
