@@ -9,7 +9,7 @@
 
 git remote add origin ssh://capitals@capitalsfinanceacademy.com/home/capitals/backendapi.capitalsfinanceacademy.com
 
-git push -u origin master
+git push -u origin-cpanel master
 
  git push name-of-repo master
 
