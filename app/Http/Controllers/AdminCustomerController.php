@@ -54,6 +54,13 @@ class AdminCustomerController extends Controller
         ], 200);
     }
 
+    public function clearKyc(Customer $customer) {
+        $customer->update([
+            "id_card" => null,
+        ]);
+        return response()->json(["status" => "success", "message" => "KYC cleared"], 200);
+    }
+
     public function letInvest()
     {
         $id = request()->input("id");

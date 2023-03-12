@@ -89,6 +89,8 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/toggle/withdraw', [AdminCustomerController::class, 'letWithdraw'])->middleware(['auth:sanctum', 'type.admin']);
 
+            Route::get('/clearkyc/{customer}', [AdminCustomerController::class, 'clearKyc'])->middleware(['auth:sanctum', 'type.admin']);
+
         });
 
         Route::prefix('deposit')->group(function () {
